@@ -1,0 +1,10 @@
+# Ignorar archivos de Visual Studio y MAUI
+.vs/
+bin/
+obj/
+*.user
+*.suo
+*.dbmdl
+*.log
+*.cache
+*.vscode/
