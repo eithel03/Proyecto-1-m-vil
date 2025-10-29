@@ -1,0 +1,16 @@
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:viewmodels="clr-namespace:MiAgendaUTN.ViewModels"
+    x:Class="MiAgendaUTN.Views.SettingsPage"
+    Title="Ajustes">
+
+    <ContentPage.BindingContext>
+        <viewmodels:SettingsViewModel />
+    </ContentPage.BindingContext>
+
+    <VerticalStackLayout Padding="20">
+        <Label Text="Modo Oscuro" FontAttributes="Bold" />
+        <Switch IsToggled="{Binding IsDarkMode}" />
+    </VerticalStackLayout>
+</ContentPage>

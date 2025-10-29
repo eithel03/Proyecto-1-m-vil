@@ -1,15 +1,30 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Shell
-    x:Class="MiAgendaUTN.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:MiAgendaUTN"
-    Shell.FlyoutBehavior="Disabled"
-    Title="MiAgendaUTN">
+    xmlns:views="clr-namespace:MiAgendaUTN.Views;assembly=MiAgendaUTN"
+    x:Class="MiAgendaUTN.AppShell">
 
-    <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+    <Shell.TitleView>
+        <Label Text="Mi Agenda UTN"
+               FontAttributes="Bold"
+               FontSize="18"
+               VerticalOptions="Center"
+               HorizontalOptions="Center" />
+    </Shell.TitleView>
 
+    <TabBar>
+        <ShellContent Title="Inicio"
+                      ContentTemplate="{DataTemplate views:HomePage}" />
+
+        <ShellContent Title="Tareas"
+                      ContentTemplate="{DataTemplate views:TasksPage}" />
+
+        <ShellContent Title="Nueva Tarea"
+                      ContentTemplate="{DataTemplate views:TaskFormPage}" />
+
+        <ShellContent Title="Ajustes"
+                      ContentTemplate="{DataTemplate views:SettingsPage}" />
+    </TabBar>
 </Shell>
