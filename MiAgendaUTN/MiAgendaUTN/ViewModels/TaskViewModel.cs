@@ -85,6 +85,13 @@ namespace MiAgendaUTN.ViewModels
                 return;
             }
 
+            // 🔸 Validación: la fecha no puede ser anterior a hoy
+            if (DueDate.Date < DateTime.Now.Date)
+            {
+                await Application.Current.MainPage.DisplayAlert("Error", "La fecha límite no puede ser anterior a hoy.", "OK");
+                return;
+            }
+
             if (SelectedTask == null)
             {
                 // Crear nuevo
@@ -111,15 +118,11 @@ namespace MiAgendaUTN.ViewModels
 
             await _dataService.SaveTasksAsync(Tasks);
 
-            // Mensaje y limpieza del formulario
             await Application.Current.MainPage.DisplayAlert("Éxito",
-               SelectedTask == null ? "Tarea guardada correctamente." : "Tarea actualizada correctamente.", "OK");
+                SelectedTask == null ? "Tarea guardada correctamente." : "Tarea actualizada correctamente.", "OK");
 
-            // 🔁 Refrescar vista: volver a la lista de tareas
             await Shell.Current.GoToAsync("..");
-
             ClearForm();
-
         }
 
         private async void SelectForEdit(TaskModel task)
