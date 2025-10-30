@@ -3,13 +3,13 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:viewmodels="clr-namespace:MiAgendaUTN.ViewModels"
     x:Class="MiAgendaUTN.Views.TasksPage"
-    Title="Tareas">
+    Title="Tareas"
+    x:Name="TasksPageRoot"
+  
+    BindingContext="{StaticResource TaskVM}">
 
-    <ContentPage.BindingContext>
-        <viewmodels:TaskViewModel />
-    </ContentPage.BindingContext>
 
-    <CollectionView ItemsSource="{Binding Tasks}">
+        <CollectionView ItemsSource="{Binding Tasks}">
         <CollectionView.ItemTemplate>
             <DataTemplate>
                 <Frame BorderColor="LightGray" Margin="10" Padding="10">
@@ -17,9 +17,24 @@
                         <Label Text="{Binding Title}" FontAttributes="Bold" />
                         <Label Text="{Binding Description}" FontSize="12" />
                         <Label Text="{Binding DueDate, StringFormat='{0:dd/MM/yyyy}'}" FontSize="10" TextColor="Gray" />
+
+                        <HorizontalStackLayout Spacing="10" Margin="0,8,0,0">
+                            <Button
+                            Text="Editar"
+                            Command="{Binding Source={x:Reference TasksPageRoot}, Path=BindingContext.SelectForEditCommand}"
+                            CommandParameter="{Binding .}" />
+
+                            <Button
+                            Text="Eliminar"
+                            BackgroundColor="Tomato"
+                            TextColor="White"
+                            Command="{Binding Source={x:Reference TasksPageRoot}, Path=BindingContext.DeleteTaskCommand}"
+                            CommandParameter="{Binding .}" />
+                        </HorizontalStackLayout>
                     </VerticalStackLayout>
                 </Frame>
             </DataTemplate>
         </CollectionView.ItemTemplate>
     </CollectionView>
+
 </ContentPage>

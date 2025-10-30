@@ -3,13 +3,13 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:viewmodels="clr-namespace:MiAgendaUTN.ViewModels"
     x:Class="MiAgendaUTN.Views.TaskFormPage"
-    Title="Nueva Tarea">
+    Title="Nueva Tarea"
+    x:Name="TaskFormRoot"
+    
+    BindingContext="{StaticResource TaskVM}">
 
-    <ContentPage.BindingContext>
-        <viewmodels:TaskViewModel />
-    </ContentPage.BindingContext>
 
-    <ScrollView>
+        <ScrollView>
         <VerticalStackLayout Padding="20">
 
             <Label Text="Título:" />
@@ -22,8 +22,9 @@
             <DatePicker Date="{Binding DueDate}" />
 
             <Button
-                Text="Agregar Tarea"
-                Command="{Binding AddTaskCommand}" />
+            Text="Agregar Tarea"
+            Command="{Binding AddOrUpdateTaskCommand}" />
+
 
         </VerticalStackLayout>
     </ScrollView>
