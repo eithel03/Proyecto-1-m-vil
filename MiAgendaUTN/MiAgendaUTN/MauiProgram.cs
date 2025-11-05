@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
+using PdfSharpCore.Fonts;
+using MiAgendaUTN.Services;
 
 namespace MiAgendaUTN
 {
@@ -15,10 +17,12 @@ namespace MiAgendaUTN
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
-#if DEBUG
-    		builder.Logging.AddDebug();
-#endif
+            // ¡Asignar sin leer el getter!
+            GlobalFontSettings.FontResolver = new OpenSansFontResolver();
 
+#if DEBUG
+            builder.Logging.AddDebug();
+#endif
             return builder.Build();
         }
     }

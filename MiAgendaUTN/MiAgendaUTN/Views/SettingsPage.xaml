@@ -1,16 +1,51 @@
-<ContentPage
+﻿<ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:viewmodels="clr-namespace:MiAgendaUTN.ViewModels"
     x:Class="MiAgendaUTN.Views.SettingsPage"
     Title="Ajustes">
 
+    <!-- Contexto de datos (para modo oscuro) -->
     <ContentPage.BindingContext>
         <viewmodels:SettingsViewModel />
     </ContentPage.BindingContext>
 
-    <VerticalStackLayout Padding="20">
-        <Label Text="Modo Oscuro" FontAttributes="Bold" />
-        <Switch IsToggled="{Binding IsDarkMode}" />
-    </VerticalStackLayout>
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+
+            <!-- 🔆 Sección de tema -->
+            <Label Text="Configuración de Apariencia"
+                   FontAttributes="Bold"
+                   FontSize="18"
+                   HorizontalOptions="Center" />
+
+            <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+                <Label Text="Modo Oscuro" VerticalOptions="Center" />
+                <Switch IsToggled="{Binding IsDarkMode}" />
+            </HorizontalStackLayout>
+
+            <BoxView HeightRequest="1" Color="Gray" Opacity="0.4" />
+
+            <!-- 📤 Sección de exportaciones -->
+            <Label Text="Exportar Información"
+                   FontAttributes="Bold"
+                   FontSize="18"
+                   HorizontalOptions="Center" />
+
+            <Button Text="Exportar tareas (JSON)"
+                    Clicked="OnExportJsonClicked"
+                    BackgroundColor="#512BD4"
+                    TextColor="White"
+                    CornerRadius="10"
+                    HeightRequest="45" />
+
+            <Button Text="Exportar tareas (PDF)"
+                    Clicked="OnExportPdfClicked"
+                    BackgroundColor="#1E88E5"
+                    TextColor="White"
+                    CornerRadius="10"
+                    HeightRequest="45" />
+
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>
