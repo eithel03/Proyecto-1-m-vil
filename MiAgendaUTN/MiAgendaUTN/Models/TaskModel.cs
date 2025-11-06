@@ -1,12 +1,16 @@
-﻿// MiAgendaUTN/Models/TaskModel.cs
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace MiAgendaUTN.Models
 {
     public class TaskModel : INotifyPropertyChanged
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
+        private string _id = Guid.NewGuid().ToString();
+        public string Id
+        {
+            get => _id;
+            set { _id = value; OnPropertyChanged(); }
+        }
 
         private string _title = string.Empty;
         public string Title
@@ -15,8 +19,8 @@ namespace MiAgendaUTN.Models
             set { _title = value; OnPropertyChanged(); }
         }
 
-        private string _description = string.Empty;
-        public string Description
+        private string? _description;
+        public string? Description
         {
             get => _description;
             set { _description = value; OnPropertyChanged(); }
