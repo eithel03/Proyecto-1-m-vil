@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using MiAgendaUTN.Services;
+using MiAgendaUTN.ViewModels;
+using Microsoft.Extensions.Logging;
 using PdfSharpCore.Fonts;
-using MiAgendaUTN.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MiAgendaUTN
 {
@@ -19,6 +21,9 @@ namespace MiAgendaUTN
 
             // ¡Asignar sin leer el getter!
             GlobalFontSettings.FontResolver = new OpenSansFontResolver();
+            builder.Services.AddSingleton<MiAgendaUTN.Services.TaskDataService>();
+            builder.Services.AddSingleton<MiAgendaUTN.ViewModels.TaskViewModel>();
+
 
 #if DEBUG
             builder.Logging.AddDebug();

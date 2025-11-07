@@ -1,129 +1,222 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="MiAgendaUTN.Views.HomePage"
-             Title="Inicio">
+<ContentPage
+    x:Class="MiAgendaUTN.Views.HomePage"
+    x:Name="Home"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Inicio">
 
+    <!-- =================== PALETA & ESTILOS =================== -->
     <ContentPage.Resources>
+        <!-- Colores base -->
         <Color x:Key="RebelBlue">#0D47A1</Color>
-        <Color x:Key="RebelAccent">#FFEB3B</Color> <Color x:Key="RebelHighlight">#C2185B</Color> <Color x:Key="RebelDarkBg">#121212</Color>
+        <Color x:Key="RebelAccent">#FFEB3B</Color>
+        <Color x:Key="RebelHighlight">#C2185B</Color>
+        <Color x:Key="RebelDarkBg">#121212</Color>
         <Color x:Key="RebelLightBg">#F0F4FF</Color>
 
+        <!-- Botón principal -->
         <Style x:Key="RebelButtonStyle" TargetType="Button">
             <Setter Property="BackgroundColor" Value="{StaticResource RebelAccent}" />
             <Setter Property="TextColor" Value="{StaticResource RebelBlue}" />
             <Setter Property="CornerRadius" Value="10" />
             <Setter Property="FontAttributes" Value="Bold" />
-            <Setter Property="Padding" Value="12, 6" />
+            <Setter Property="Padding" Value="12,6" />
+            <Setter Property="HeightRequest" Value="46" />
+        </Style>
+
+        <!-- Tarjetas KPI -->
+        <Style x:Key="KpiFrame" TargetType="Frame">
+            <Setter Property="Padding" Value="12" />
+            <Setter Property="HasShadow" Value="True" />
+            <Setter Property="CornerRadius" Value="14" />
+            <Setter Property="BackgroundColor"
+                    Value="{AppThemeBinding Light={StaticResource RebelLightBg}, Dark={StaticResource RebelDarkBg}}" />
+            <Setter Property="BorderColor" Value="#EEEEEE" />
+        </Style>
+
+        <!-- Tarjetas de listas -->
+        <Style x:Key="CardFrame" TargetType="Frame">
+            <Setter Property="Padding" Value="12" />
+            <Setter Property="Margin" Value="0,0,0,10" />
+            <Setter Property="HasShadow" Value="False" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="BackgroundColor"
+                    Value="{AppThemeBinding Light=#FFFFFF, Dark={StaticResource RebelDarkBg}}" />
+            <Setter Property="BorderColor"
+                    Value="{AppThemeBinding Light=#EEEEEE, Dark=#2A2A2A}" />
         </Style>
     </ContentPage.Resources>
 
+    <!-- =================== CONTENIDO =================== -->
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="20">
-            <Label Text="Bienvenido a Mi Agenda UTN"
+
+            <!-- Encabezado -->
+            <Label Text="Mi Agenda UTN"
                    FontSize="28"
-                   FontAttributes="Bold, Italic"
+                   FontAttributes="Bold,Italic"
                    TextColor="{StaticResource RebelBlue}"
-                   HorizontalOptions="Center"
-                   VerticalOptions="Center" />
+                   HorizontalTextAlignment="Center" />
 
-            <VerticalStackLayout Spacing="18">
-                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
-                    
-                    <Frame Padding="12" HasShadow="True" CornerRadius="14" BorderColor="#42A5F5"
-                           BackgroundColor="{AppThemeBinding Light={StaticResource RebelLightBg}, Dark={StaticResource RebelDarkBg}}">
-                        <VerticalStackLayout Spacing="4">
-                            <Label Text="Pendientes" FontSize="12" Opacity="0.8" TextColor="{StaticResource RebelBlue}"/>
-                            <Label Text="{Binding PendingCount}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource RebelBlue}"/>
-                        </VerticalStackLayout>
-                    </Frame>
-
-                    <Frame Grid.Column="1" Padding="12" HasShadow="True" CornerRadius="14" BorderColor="{StaticResource RebelAccent}"
-                           BackgroundColor="{AppThemeBinding Light=#FFFDE7, Dark={StaticResource RebelDarkBg}}">
-                        <VerticalStackLayout Spacing="4">
-                            <Label Text="¡Para hoy!" FontSize="12" Opacity="0.8" TextColor="{StaticResource RebelAccent}"/>
-                            <Label Text="{Binding DueTodayCount}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource RebelAccent}"/>
-                        </VerticalStackLayout>
-                    </Frame>
-
-                    <Frame Grid.Column="2" Padding="12" HasShadow="True" CornerRadius="14" BorderColor="{StaticResource RebelHighlight}"
-                           BackgroundColor="{AppThemeBinding Light=#FFF3F9, Dark={StaticResource RebelDarkBg}}">
-                        <VerticalStackLayout Spacing="4">
-                            <Label Text="Hechas" FontSize="12" Opacity="0.8" TextColor="{StaticResource RebelHighlight}"/>
-                            <Label Text="{Binding CompletedCount}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource RebelHighlight}"/>
-                        </VerticalStackLayout>
-                    </Frame>
-                </Grid>
-
-                <Frame Padding="16" HasShadow="True" CornerRadius="16"
-                       BackgroundColor="{AppThemeBinding Light={StaticResource RebelBlue}, Dark={StaticResource RebelBlue}}"
-                       BorderColor="{StaticResource RebelAccent}">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <VerticalStackLayout Spacing="2">
-                            <Label Text="Próxima tarea clave" FontSize="14" Opacity="0.9" TextColor="White"/>
-                            <Label FontSize="20" FontAttributes="Bold" TextColor="{StaticResource RebelAccent}">
-                                <Label.Text>
-                                    <Binding Path="NextTask.Title" />
-                                </Label.Text>
-                                <Label.Triggers>
-                                    <DataTrigger TargetType="Label" Binding="{Binding NextTask}" Value="{x:Null}">
-                                        <Setter Property="Text" Value="¡Libre! Agrega algo épico" />
-                                    </DataTrigger>
-                                </Label.Triggers>
-                            </Label>
-                            <Label FontSize="13" Opacity="0.9" TextColor="White">
-                                <Label.Text>
-                                    <MultiBinding StringFormat="{}{0:dd/MM/yyyy @ HH:mm}">
-                                        <Binding Path="NextTask.DueDate"/>
-                                    </MultiBinding>
-                                </Label.Text>
-                                <Label.Triggers>
-                                    <DataTrigger TargetType="Label" Binding="{Binding NextTask.DueDate}" Value="{x:Null}">
-                                        <Setter Property="Text" Value="—" />
-                                    </DataTrigger>
-                                </Label.Triggers>
-                            </Label>
-                        </VerticalStackLayout>
-
-                        <Button Grid.Column="1"
-                                Text="Agregar tarea ➕"
-                                Style="{StaticResource RebelButtonStyle}"
-                                HorizontalOptions="End"
-                                VerticalOptions="Center"
-                                Command="{Binding GoToNuevaTareaCommand}" />
-                    </Grid>
+            <!-- KPIs -->
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                <Frame Style="{StaticResource KpiFrame}" BorderColor="#42A5F5">
+                    <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                        <Label Text="Pendientes" FontSize="12" TextColor="{StaticResource RebelBlue}" Opacity="0.8"/>
+                        <Label Text="{Binding PendingCount}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource RebelBlue}"/>
+                    </VerticalStackLayout>
                 </Frame>
 
-                <Label Text="Tus Próximos Golpes" FontAttributes="Bold" FontSize="18" TextColor="{StaticResource RebelBlue}" Margin="0, 10, 0, 0" />
-                <CollectionView ItemsSource="{Binding UpcomingTasks}">
-                    <CollectionView.EmptyView>
-                        <Grid Padding="10">
-                            <Label Text="¡Nada por aquí! Tienes vía libre 🚀"
-                                   HorizontalTextAlignment="Center" FontAttributes="Italic" Opacity="0.7"/>
-                        </Grid>
-                    </CollectionView.EmptyView>
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate>
-                            <Frame Padding="12" Margin="0,0,0,10" HasShadow="False" CornerRadius="12"
-                                   BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark={StaticResource RebelDarkBg}}"
-                                   BorderColor="{AppThemeBinding Light=#EEEEEE, Dark=#2A2A2A}">
+                <Frame Grid.Column="1" Style="{StaticResource KpiFrame}" BorderColor="{StaticResource RebelAccent}">
+                    <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                        <Label Text="Para hoy" FontSize="12" TextColor="{StaticResource RebelAccent}" Opacity="0.8"/>
+                        <Label Text="{Binding DueTodayCount}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource RebelAccent}"/>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Frame Grid.Column="2" Style="{StaticResource KpiFrame}" BorderColor="{StaticResource RebelHighlight}">
+                    <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                        <Label Text="Completadas" FontSize="12" TextColor="{StaticResource RebelHighlight}" Opacity="0.8"/>
+                        <Label Text="{Binding CompletedCount}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource RebelHighlight}"/>
+                    </VerticalStackLayout>
+                </Frame>
+            </Grid>
+
+            <!-- Banner "Próxima tarea" + acción -->
+            <Frame Padding="16" HasShadow="True" CornerRadius="16"
+                   BackgroundColor="{StaticResource RebelBlue}"
+                   BorderColor="{StaticResource RebelAccent}">
+                <Grid ColumnDefinitions="*,Auto">
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="Próxima tarea clave" FontSize="14" TextColor="White" Opacity="0.9"/>
+                        <Label FontSize="20" FontAttributes="Bold" TextColor="{StaticResource RebelAccent}">
+                            <Label.Text>
+                                <Binding Path="NextTask.Title" />
+                            </Label.Text>
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding NextTask}" Value="{x:Null}">
+                                    <Setter Property="Text" Value="¡Libre! Agrega algo épico" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+                        <Label FontSize="13" TextColor="White" Opacity="0.9">
+                            <Label.Text>
+                                <Binding Path="NextTask.DueDate" StringFormat="{}{0:dd/MM/yyyy @ HH:mm}" />
+                            </Label.Text>
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding NextTask}" Value="{x:Null}">
+                                    <Setter Property="Text" Value="—" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+                    </VerticalStackLayout>
+
+                    <Button Grid.Column="1"
+                            Text="Agregar tarea ➕"
+                            Style="{StaticResource RebelButtonStyle}"
+                            HorizontalOptions="End"
+                            VerticalOptions="Center"
+                            Command="{Binding GoToNuevaTareaCommand}" />
+                </Grid>
+            </Frame>
+
+            <!-- Próximas tareas -->
+            <Label Text="Próximas tareas" FontAttributes="Bold" FontSize="18"
+                   TextColor="{StaticResource RebelBlue}" Margin="0,10,0,0" />
+
+            <CollectionView ItemsSource="{Binding UpcomingTasks}" SelectionMode="None">
+                <CollectionView.EmptyView>
+                    <Grid Padding="10">
+                        <Label Text="¡Nada por aquí! Tienes vía libre 🚀"
+                               HorizontalTextAlignment="Center" FontAttributes="Italic" Opacity="0.7"/>
+                    </Grid>
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <SwipeView>
+                            <SwipeView.RightItems>
+                                <SwipeItems Mode="Reveal">
+                                    <!-- Finalizar -->
+                                    <SwipeItem Text="Finalizar"
+                                               BackgroundColor="#22C55E"
+                                               Command="{Binding BindingContext.ToggleDoneCommand, Source={x:Reference Home}}"
+                                               CommandParameter="{Binding .}" />
+                                    <!-- Eliminar -->
+                                    <SwipeItem Text="Eliminar"
+                                               BackgroundColor="#EF4444"
+                                               Command="{Binding BindingContext.DeleteTaskCommand, Source={x:Reference Home}}"
+                                               CommandParameter="{Binding .}" />
+                                </SwipeItems>
+                            </SwipeView.RightItems>
+
+                            <Frame Style="{StaticResource CardFrame}">
                                 <Grid ColumnDefinitions="*,Auto">
                                     <VerticalStackLayout Spacing="2">
-                                        <Label Text="{Binding Title}" FontAttributes="Bold" TextColor="{StaticResource RebelHighlight}" />
-                                        <Label Text="{Binding DueDate, StringFormat='Fecha Límite: {0:dd/MM/yyyy HH:mm}'}"
+                                        <Label Text="{Binding Title}" FontAttributes="Bold"
+                                               TextColor="{StaticResource RebelHighlight}" />
+                                        <Label Text="{Binding Description}" FontSize="13" Opacity="0.8"/>
+                                        <Label Text="{Binding DueDate, StringFormat='Fecha límite: {0:dd/MM/yyyy HH:mm}'}"
                                                FontSize="12" Opacity="0.8"/>
                                     </VerticalStackLayout>
-                                    <CheckBox Grid.Column="1" IsChecked="{Binding IsCompleted}" Color="{StaticResource RebelAccent}" />
                                 </Grid>
                             </Frame>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
+                        </SwipeView>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
 
-                <BoxView HeightRequest="12"/>
-            </VerticalStackLayout>
+            <!-- Acción rápida -->
+            <Button Text="Nueva tarea"
+                    Style="{StaticResource RebelButtonStyle}"
+                    Command="{Binding GoToNuevaTareaCommand}" />
 
+            <!-- Tareas finalizadas -->
+            <Label Text="Tareas finalizadas" FontAttributes="Bold" FontSize="18"
+                   TextColor="{StaticResource RebelBlue}" Margin="0,10,0,0" />
+
+            <CollectionView ItemsSource="{Binding CompletedTasks}" SelectionMode="None">
+                <CollectionView.EmptyView>
+                    <Grid Padding="10">
+                        <Label Text="No hay tareas finalizadas aún."
+                               HorizontalTextAlignment="Center" Opacity="0.7"/>
+                    </Grid>
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <SwipeView>
+                            <SwipeView.RightItems>
+                                <SwipeItems Mode="Reveal">
+                                    <!-- Reabrir -->
+                                    <SwipeItem Text="Reabrir"
+                                               BackgroundColor="#F59E0B"
+                                               Command="{Binding BindingContext.ToggleDoneCommand, Source={x:Reference Home}}"
+                                               CommandParameter="{Binding .}" />
+                                    <!-- Eliminar -->
+                                    <SwipeItem Text="Eliminar"
+                                               BackgroundColor="#EF4444"
+                                               Command="{Binding BindingContext.DeleteTaskCommand, Source={x:Reference Home}}"
+                                               CommandParameter="{Binding .}" />
+                                </SwipeItems>
+                            </SwipeView.RightItems>
+
+                            <Frame Style="{StaticResource CardFrame}"
+                                   BackgroundColor="{AppThemeBinding Light=#FFF3F9, Dark={StaticResource RebelDarkBg}}">
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="{Binding Title}" FontAttributes="Bold"
+                                           TextDecorations="Strikethrough"
+                                           TextColor="{StaticResource RebelHighlight}" />
+                                    <Label Text="{Binding Description}" FontSize="13" Opacity="0.8"/>
+                                    <Label Text="{Binding DueDate, StringFormat='Finalizada: {0:dd/MM/yyyy}'}"
+                                           FontSize="12" Opacity="0.8"/>
+                                </VerticalStackLayout>
+                            </Frame>
+                        </SwipeView>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <BoxView HeightRequest="12"/>
         </VerticalStackLayout>
     </ScrollView>
-    
-     </ContentPage>
+</ContentPage>

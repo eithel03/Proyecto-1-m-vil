@@ -9,39 +9,54 @@ namespace MiAgendaUTN.Models
         public string Id
         {
             get => _id;
-            set { _id = value; OnPropertyChanged(); }
+            set => SetProperty(ref _id, value);
         }
 
         private string _title = string.Empty;
         public string Title
         {
             get => _title;
-            set { _title = value; OnPropertyChanged(); }
+            set => SetProperty(ref _title, value);
         }
 
         private string? _description;
         public string? Description
         {
             get => _description;
-            set { _description = value; OnPropertyChanged(); }
+            set => SetProperty(ref _description, value);
         }
 
         private DateTime _dueDate = DateTime.Now;
         public DateTime DueDate
         {
             get => _dueDate;
-            set { _dueDate = value; OnPropertyChanged(); }
+            set => SetProperty(ref _dueDate, value);
         }
 
         private bool _isCompleted;
         public bool IsCompleted
         {
             get => _isCompleted;
-            set { _isCompleted = value; OnPropertyChanged(); }
+            set => SetProperty(ref _isCompleted, value);
         }
 
+    
+
         public event PropertyChangedEventHandler? PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string? name = null) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+        protected bool SetProperty<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value))
+                return false;
+
+            field = value;
+            OnPropertyChanged(propertyName);
+            return true;
+        }
+
+        protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

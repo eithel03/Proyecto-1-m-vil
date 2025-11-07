@@ -2,8 +2,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Maui.Controls;
 using MiAgendaUTN.Models;
 using MiAgendaUTN.Services;
@@ -14,9 +12,12 @@ namespace MiAgendaUTN.ViewModels
     {
         private readonly TaskDataService _dataService;
 
-        // Lista principal que ya usas en la vista
+        // ===== Colecciones que usa la vista =====
         public ObservableCollection<TaskModel> Tasks { get; set; } = new();
+        public ObservableCollection<TaskModel> UpcomingTasks { get; } = new();
+        public ObservableCollection<TaskModel> CompletedTasks { get; } = new();
 
+        // ===== Campos de edición / formulario =====
         private TaskModel? _selectedTask;
         public TaskModel? SelectedTask
         {
@@ -35,28 +36,15 @@ namespace MiAgendaUTN.ViewModels
         }
 
         private string? _title;
-        public string? Title
-        {
-            get => _title;
-            set { _title = value; OnPropertyChanged(); }
-        }
+        public string? Title { get => _title; set { _title = value; OnPropertyChanged(); } }
 
         private string? _description;
-        public string? Description
-        {
-            get => _description;
-            set { _description = value; OnPropertyChanged(); }
-        }
+        public string? Description { get => _description; set { _description = value; OnPropertyChanged(); } }
 
         private DateTime _dueDate = DateTime.Now;
-        public DateTime DueDate
-        {
-            get => _dueDate;
-            set { _dueDate = value; OnPropertyChanged(); }
-        }
+        public DateTime DueDate { get => _dueDate; set { _dueDate = value; OnPropertyChanged(); } }
 
-        // ======= NUEVO: Panel / Dashboard =======
-
+        // ===== KPI / Dashboard =====
         public int PendingCount { get; private set; }
         public int DueTodayCount { get; private set; }
         public int CompletedCount { get; private set; }
@@ -68,48 +56,44 @@ namespace MiAgendaUTN.ViewModels
             private set { _nextTask = value; OnPropertyChanged(); }
         }
 
-        public ObservableCollection<TaskModel> UpcomingTasks { get; } = new();
-
-        // ======= Comandos expuestos para la vista =======
+        // ===== Comandos para la vista =====
         public ICommand AddOrUpdateTaskCommand { get; }
         public ICommand DeleteTaskCommand { get; }
         public ICommand SelectForEditCommand { get; }
         public ICommand ClearSelectionCommand { get; }
-
-        // NUEVO: Botón "Agregar tarea" del panel
-        public ICommand GoToNuevaTareaCommand { get; }
+        public ICommand ToggleDoneCommand { get; }            // ✅ Finalizar / Reabrir
+        public ICommand GoToNuevaTareaCommand { get; }        // Botón Nueva tarea
 
         public TaskViewModel()
         {
             _dataService = new TaskDataService();
 
             AddOrUpdateTaskCommand = new Command(async () => await AddOrUpdateTaskAsync());
-            DeleteTaskCommand = new Command<TaskModel>(async (t) => await DeleteTaskAsync(t));
-            SelectForEditCommand = new Command<TaskModel>((t) => SelectForEdit(t));
-            ClearSelectionCommand = new Command(() => ClearForm());
+            DeleteTaskCommand = new Command<TaskModel>(async t => await DeleteTaskAsync(t));
+            SelectForEditCommand = new Command<TaskModel>(SelectForEdit);
+            ClearSelectionCommand = new Command(ClearForm);
+            ToggleDoneCommand = new Command<TaskModel>(async t => await ToggleDoneAsync(t));
+            GoToNuevaTareaCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(Views.TaskFormPage), true));
 
-            GoToNuevaTareaCommand = new Command(async () =>
-            {
-                // Abre el formulario de creación/edición que ya usas
-                await Shell.Current.GoToAsync(nameof(Views.TaskFormPage), true);
-            });
-
-            // Cargar desde JSON al iniciar la instancia
+            // Cargar datos al crear el VM
             _ = LoadAsync();
         }
 
-        // Cargar tareas desde JSON
+        // ===== Carga desde JSON =====
         public async Task LoadAsync()
         {
             var loaded = await _dataService.LoadTasksAsync();
+
+            // Reemplazo la colección para simplificar (y aviso a la vista)
             Tasks = new ObservableCollection<TaskModel>(loaded);
             OnPropertyChanged(nameof(Tasks));
 
-            // Hook para actualizar panel automáticamente
             HookTasksCollectionChanged();
+            ReorderTasksInPlace();
             RecomputeDashboard();
         }
 
+        // ===== Crear / Actualizar =====
         private async Task AddOrUpdateTaskAsync()
         {
             if (string.IsNullOrWhiteSpace(Title))
@@ -118,7 +102,6 @@ namespace MiAgendaUTN.ViewModels
                 return;
             }
 
-            // Validación: la fecha no puede ser anterior a hoy
             if (DueDate.Date < DateTime.Now.Date)
             {
                 await Application.Current.MainPage.DisplayAlert("Error", "La fecha límite no puede ser anterior a hoy.", "OK");
@@ -127,11 +110,10 @@ namespace MiAgendaUTN.ViewModels
 
             if (SelectedTask == null)
             {
-                // Crear nuevo
                 var newTask = new TaskModel
                 {
                     Title = Title,
-                    Description = Description,
+                    Description = string.IsNullOrWhiteSpace(Description) ? null : Description,
                     DueDate = DueDate,
                     IsCompleted = false
                 };
@@ -139,16 +121,16 @@ namespace MiAgendaUTN.ViewModels
             }
             else
             {
-                // Actualizar existente
                 var ex = Tasks.FirstOrDefault(t => t.Id == SelectedTask.Id);
                 if (ex != null)
                 {
                     ex.Title = Title;
-                    ex.Description = Description;
+                    ex.Description = string.IsNullOrWhiteSpace(Description) ? null : Description;
                     ex.DueDate = DueDate;
                 }
             }
 
+            ReorderTasksInPlace();
             await _dataService.SaveTasksAsync(Tasks);
 
             await Application.Current.MainPage.DisplayAlert("Éxito",
@@ -156,36 +138,90 @@ namespace MiAgendaUTN.ViewModels
 
             await Shell.Current.GoToAsync("..");
             ClearForm();
-
-            // Asegurar recálculo inmediato (aunque el Hook también lo hará)
             RecomputeDashboard();
         }
 
+        // ===== Seleccionar para editar =====
         private async void SelectForEdit(TaskModel task)
         {
             if (task == null) return;
 
             SelectedTask = task;
 
-            // Navegar a la página de edición con los datos cargados
             await Shell.Current.GoToAsync(nameof(Views.TaskFormPage), true, new Dictionary<string, object>
             {
                 ["TaskToEdit"] = task
             });
         }
 
+        // ===== Eliminar =====
         private async Task DeleteTaskAsync(TaskModel task)
         {
             if (task == null) return;
 
-            bool confirm = await Application.Current.MainPage.DisplayAlert("Confirmar", $"¿Eliminar la tarea '{task.Title}'?", "Sí", "No");
+            bool confirm = await Application.Current.MainPage.DisplayAlert(
+                "Confirmar", $"¿Eliminar la tarea '{task.Title}'?", "Sí", "No");
             if (!confirm) return;
 
-            Tasks.Remove(task);
-            await _dataService.SaveTasksAsync(Tasks);
+            // Quitar de la lista principal por Id
+            var toRemove = Tasks.FirstOrDefault(t => t.Id == task.Id);
+            if (toRemove != null)
+                Tasks.Remove(toRemove);
 
+            // Quitar también de vistas derivadas (si estuviera)
+            var up = UpcomingTasks.FirstOrDefault(t => t.Id == task.Id);
+            if (up != null) UpcomingTasks.Remove(up);
+
+            var done = CompletedTasks.FirstOrDefault(t => t.Id == task.Id);
+            if (done != null) CompletedTasks.Remove(done);
+
+            ReorderTasksInPlace();
+            await _dataService.SaveTasksAsync(Tasks);
             RecomputeDashboard();
         }
+
+
+        // ===== Finalizar / Reabrir (no borra) =====
+        private async Task ToggleDoneAsync(TaskModel task)
+        {
+            if (task == null) return;
+
+            // Cambiar estado en la colección principal (por Id para asegurar)
+            var inMain = Tasks.FirstOrDefault(t => t.Id == task.Id);
+            if (inMain != null)
+                inMain.IsCompleted = !inMain.IsCompleted;
+            else
+                task.IsCompleted = !task.IsCompleted; // fallback
+
+            // Reflejar visualmente de inmediato en listas derivadas
+            var up = UpcomingTasks.FirstOrDefault(t => t.Id == task.Id);
+            var done = CompletedTasks.FirstOrDefault(t => t.Id == task.Id);
+
+            if ((inMain ?? task).IsCompleted)
+            {
+                // Pasó a completada → salir de Upcoming y entrar a Completed
+                if (up != null) UpcomingTasks.Remove(up);
+                if (done == null)
+                    CompletedTasks.Insert(0, inMain ?? task);
+            }
+            else
+            {
+                // Reabierta → salir de Completed y (si aplica) volver a Upcoming
+                if (done != null) CompletedTasks.Remove(done);
+
+                var src = inMain ?? task;
+                if (src.DueDate.Date >= DateTime.Today) // solo “próximas”
+                {
+                    if (!UpcomingTasks.Any(t => t.Id == src.Id))
+                        UpcomingTasks.Add(src);
+                }
+            }
+
+            ReorderTasksInPlace();
+            await _dataService.SaveTasksAsync(Tasks);
+            RecomputeDashboard();
+        }
+
 
         private void ClearForm()
         {
@@ -198,7 +234,18 @@ namespace MiAgendaUTN.ViewModels
             OnPropertyChanged(nameof(DueDate));
         }
 
-        // ======= Dashboard: recálculo y suscripciones =======
+        // ===== Reordenar y Dashboard =====
+        private void ReorderTasksInPlace()
+        {
+            var ordered = Tasks
+                .OrderBy(t => t.IsCompleted)     // pendientes primero
+                .ThenBy(t => t.DueDate)          // por fecha
+                .ThenBy(t => t.Title)            // desempate
+                .ToList();
+
+            Tasks.Clear();
+            foreach (var t in ordered) Tasks.Add(t);
+        }
 
         private void RecomputeDashboard()
         {
@@ -209,19 +256,23 @@ namespace MiAgendaUTN.ViewModels
             DueTodayCount = all.Count(t => !t.IsCompleted && t.DueDate.Date == today);
             CompletedCount = all.Count(t => t.IsCompleted);
 
-            NextTask = all
-                .Where(t => !t.IsCompleted)
-                .OrderBy(t => t.DueDate)
-                .FirstOrDefault();
+            NextTask = all.Where(t => !t.IsCompleted)
+                          .OrderBy(t => t.DueDate)
+                          .FirstOrDefault();
 
+            // Próximas (pendientes)
             UpcomingTasks.Clear();
-            foreach (var t in all
-                .Where(t => !t.IsCompleted)
-                .OrderBy(t => t.DueDate)
-                .Take(3))
-            {
+            foreach (var t in all.Where(t => !t.IsCompleted)
+                                 .OrderBy(t => t.DueDate)
+                                 .Take(10))
                 UpcomingTasks.Add(t);
-            }
+
+            // Finalizadas (últimas 10)
+            CompletedTasks.Clear();
+            foreach (var t in all.Where(t => t.IsCompleted)
+                                 .OrderByDescending(t => t.DueDate)
+                                 .Take(10))
+                CompletedTasks.Add(t);
 
             OnPropertyChanged(nameof(PendingCount));
             OnPropertyChanged(nameof(DueTodayCount));
@@ -229,40 +280,35 @@ namespace MiAgendaUTN.ViewModels
             OnPropertyChanged(nameof(NextTask));
         }
 
+        // ===== Suscripciones para recalcular en caliente =====
         private void HookTasksCollectionChanged()
         {
             if (Tasks == null) return;
 
-            // Suscribir cambios en la colección
             Tasks.CollectionChanged += (s, e) =>
             {
                 if (e.NewItems != null)
-                {
                     foreach (TaskModel item in e.NewItems)
                         item.PropertyChanged += OnTaskItemPropertyChanged;
-                }
+
                 if (e.OldItems != null)
-                {
                     foreach (TaskModel item in e.OldItems)
                         item.PropertyChanged -= OnTaskItemPropertyChanged;
-                }
 
                 RecomputeDashboard();
             };
 
-            // Suscribir a los ya existentes
             foreach (var item in Tasks)
                 item.PropertyChanged += OnTaskItemPropertyChanged;
         }
 
         private void OnTaskItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            // Cualquier cambio en una tarea (IsCompleted, Title, DueDate, etc.) recalcula el panel
+            // Cualquier cambio en una tarea (IsCompleted, Title, DueDate, etc.)
             RecomputeDashboard();
         }
 
-        // ======= Notificación de cambios =======
-
+        // ===== INotifyPropertyChanged =====
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string? name = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
