@@ -1,3 +1,9 @@
+<!-- local-development:start -->
+## Desarrollo local
+
+Consulta [RUNNING.md](RUNNING.md) para ubicar cada componente, abrirlo en su IDE, compilarlo y conocer las comprobaciones realizadas y los requisitos pendientes.
+<!-- local-development:end -->
+
 Proyecto MiAgendaUTN
 Mi Agenda UTN es una aplicación de gestión de tareas diseñada para estudiantes, enfocada en la organización y priorización de compromisos académicos. Desarrollada con .NET MAUI, la aplicación implementa el patrón de diseño MVVM para garantizar una arquitectura limpia, mantenible y escalable.
 
